@@ -1,0 +1,278 @@
+// components/floating-cta.tsx
+"use client"
+
+import { Button } from "@/components/ui/button"
+import { Briefcase } from 'lucide-react'
+
+export default function FloatingCTA() {
+  return (
+    <div
+      className="
+        fixed z-50 flex flex-col gap-3
+        right-6 bottom-24 sm:bottom-28 md:bottom-28
+        pointer-events-none
+      "
+      aria-hidden
+    >
+      <div className="pointer-events-auto">
+        <Button
+          asChild
+          className="animate-pulse-slow shadow-[0_0_24px_rgba(99,102,241,0.35)]"
+          data-magnetic
+        >
+          <a href="#contact">
+            <Briefcase className="h-4 w-4 mr-2" />
+            Hire Me
+          </a>
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// components/chatbot.tsx
+"use client"
+
+import { useState } from "react"
+import { MessageCircle } from 'lucide-react'
+import SectionReveal from "@/components/section-reveal"
+import ChatMessage from "@/components/chat-message"
+
+type ChatMessage = {
+  id: number
+  text: string
+  sender: "user" | "bot"
+}
+
+export default function Chatbot() {
+  const [open, setOpen] = useState(false)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [input, setInput] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setIsLoading(true)
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ input }),
+    })
+    const data = await response.json()
+    setMessages([...messages, { id: Date.now(), text: input, sender: "user" }, { id: Date.now() + 1, text: data.response, sender: "bot" }])
+    setInput("")
+    setIsLoading(false)
+  }
+
+  return (
+    <div className="fixed right-4 sm:right-6 bottom-4 sm:bottom-6 z-50">
+      {open && (
+        <div className="mb-3 w-[88vw] max-w-md rounded-2xl border border-border/60 bg-background/95 backdrop-blur shadow-lg overflow-hidden">
+          <div className="p-4 flex flex-col space-y-4">
+            {messages.map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))}
+            <form onSubmit={onSubmit} className="flex">
+              <Input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type a message..."
+                className="flex-1"
+                disabled={isLoading}
+              />
+              <Button type="submit" className="ml-2" disabled={isLoading}>
+                Send
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+      <button
+        className="h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:opacity-90"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Open chat"
+      >
+        <MessageCircle className="h-5 w-5" />
+      </button>
+    </div>
+  )
+}
+
+// components/github-projects.tsx
+"use client"
+
+import { useEffect, useState } from "react"
+import { Star, Code2, ExternalLink, Github } from 'lucide-react'
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import SectionReveal from "@/components/section-reveal"
+
+type Repo = {
+  id: number
+  name: string
+  html_url: string
+  stargazers_count: number
+  language: string | null
+  description: string | null
+  updated_at: string
+}
+
+const DEFAULT_USER = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "vercel"
+
+export default function GithubProjects() {
+  const [username, setUsername] = useState<string>(DEFAULT_USER)
+  const [repos, setRepos] = useState<Repo[] | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem("github_username")
+    if (saved) setUsername(saved)
+  }, [])
+
+  useEffect(() => {
+    fetchRepos(username)
+  }, [username])
+
+  async function fetchRepos(user: string) {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/github?username=${encodeURIComponent(user)}`)
+      const data = await res.json()
+      setRepos(data.repos)
+    } catch (e) {
+      setRepos([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function saveUsername() {
+    localStorage.setItem("github_username", username)
+    fetchRepos(username)
+  }
+
+  return (
+    <SectionReveal className="mt-16">
+      <div className="container">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-4">
+            <h2 className="text-3xl font-bold tracking-tight">GitHub Projects</h2>
+            <p className="text-lg text-muted-foreground">
+              Here are some of my projects hosted on GitHub.
+            </p>
+          </div>
+          <div className="flex gap-4">
+            <Input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter GitHub username"
+              className="w-full md:w-auto"
+            />
+            <Button onClick={saveUsername}>Set</Button>
+          </div>
+        </div>
+        {loading ? (
+          <div className="mt-6 flex flex-col items-center justify-center">
+            <div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+            <p className="mt-4 text-lg text-muted-foreground">Loading...</p>
+          </div>
+        ) : repos ? (
+          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+            {repos.map((repo) => (
+              <div key={repo.id} className="rounded-lg border border-border/60 bg-background/95 p-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold">{repo.name}</h3>
+                  <div className="flex items-center gap-2">
+                    {repo.language && (
+                      <div className="flex items-center gap-1">
+                        <Code2 className="h-4 w-4" />
+                        <p className="text-sm text-muted-foreground">{repo.language}</p>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4" />
+                      <p className="text-sm text-muted-foreground">{repo.stargazers_count}</p>
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">{repo.description}</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <a href={repo.html_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
+                    <ExternalLink className="h-4 w-4" />
+                    View on GitHub
+                  </a>
+                  <a href={repo.html_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
+                    <Github className="h-4 w-4" />
+                    Code
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-6 flex flex-col items-center justify-center">
+            <p className="text-lg text-muted-foreground">No repositories found.</p>
+          </div>
+        )}
+      </div>
+    </SectionReveal>
+  )
+}
+
+// app/api/github/route.ts
+import type { NextRequest } from "next/server"
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url)
+  const envDefault = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "vercel"
+  const username = searchParams.get("username") || envDefault
+
+  const url = `https://api.github.com/users/${encodeURIComponent(
+    username,
+  )}/repos?per_page=100&sort=updated&direction=desc`
+
+  const headers: Record<string, string> = {
+    "User-Agent": "madhan-portfolio",
+    Accept: "application/vnd.github+json",
+  }
+
+  // Optional: GitHub token for higher rate limit or private repos (server-only).
+  const token = process.env.GITHUB_TOKEN
+  if (token) headers.Authorization = `Bearer ${token}`
+
+  const res = await fetch(url, {
+    headers,
+    cache: "no-store",
+  })
+
+  if (!res.ok) {
+    return new Response(JSON.stringify({ repos: [] }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })
+  }
+
+  const repos = (await res.json()) as any[]
+  const top = repos
+    .filter((r) => !r.fork)
+    .sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
+    .slice(0, 6)
+    .map((r) => ({
+      id: r.id,
+      name: r.name,
+      html_url: r.html_url,
+      stargazers_count: r.stargazers_count,
+      language: r.language,
+      description: r.description,
+      updated_at: r.updated_at,
+    }))
+
+  return new Response(JSON.stringify({ repos: top }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  })
+}

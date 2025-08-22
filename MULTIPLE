@@ -1,0 +1,652 @@
+// app/layout.tsx
+import { ThemeProvider } from "@/components/theme-provider"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "MADHANKUMAR C",
+  description: "Personal portfolio website",
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
+  )
+}
+
+// components/theme-toggle.tsx
+"use client"
+
+import { useTheme } from "next-themes"
+import { Button } from "@/components/ui/button"
+import { Sun, Moon } from 'lucide-react'
+import { cn } from "@/lib/utils"
+
+export function ThemeToggle({ className = "" }: { className?: string }) {
+  const { resolvedTheme, setTheme } = useTheme()
+  const isDark = resolvedTheme !== "light"
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      className={cn("rounded-full", className)}
+      aria-label="Toggle theme"
+      data-magnetic
+    >
+      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    </Button>
+  )
+}
+
+// components/hero.tsx
+"use client"
+
+import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion"
+import ParticleNetwork from "@/components/particle-network"
+import { Download } from 'lucide-react'
+
+const NAME = "MADHANKUMAR C"
+const TAGLINE =
+  "Adaptable Web Developer passionate about AI, Blockchain, and Cybersecurity"
+
+function useTypingEffect(text: string, speed = 40) {
+  const [display, setDisplay] = useState("")
+  useEffect(() => {
+    let i = 0
+    let cancelled = false
+
+    const tick = () => {
+      if (cancelled) return
+      if (i < text.length) {
+        setDisplay((prev) => prev + text.charAt(i))
+        i += 1
+        setTimeout(tick, speed)
+      } else {
+        // ensure no stray "undefined"
+        setDisplay(text)
+      }
+    }
+
+    setDisplay("")
+    tick()
+    return () => {
+      cancelled = true
+    }
+  }, [text, speed])
+
+  return display
+}
+
+export default function Hero() {
+  const typedName = useTypingEffect(NAME, 70)
+  const typedTagline = useTypingEffect(TAGLINE, 12)
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-b from-background/40 to-background/80">
+      <div className="absolute inset-0 -z-10">
+        <ParticleNetwork />
+      </div>
+      <div className="relative px-6 py-20 sm:px-10 sm:py-28 md:py-36">
+        <motion.h1
+          className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 120, damping: 18, delay: 0.1 }}
+        >
+          {typedName}
+          <span className="sr-only">{NAME}</span>
+        </motion.h1>
+
+        <motion.p
+          className="mt-4 text-lg sm:text-xl max-w-3xl text-muted-foreground"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 120, damping: 18, delay: 0.3 }}
+        >
+          {typedTagline}
+        </motion.p>
+
+        <motion.div
+          className="mt-8 flex flex-wrap gap-3"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 120, damping: 18, delay: 0.5 }}
+        >
+          <Button asChild size="lg" className="glow-button" data-magnetic>
+            <a href="/api/resume" download>
+              <Download className="mr-2 h-4 w-4" />
+              Download Resume
+            </a>
+          </Button>
+          <Button variant="outline" asChild size="lg" data-magnetic>
+            <a href="#contact">Contact Me</a>
+          </Button>
+        </motion.div>
+      </div>
+    </div>
+  )
+}
+
+// components/navbar.tsx
+import { useState } from "react"
+import { cn } from "@/lib/utils"
+import Link from "next/link"
+import { links } from "@/constants"
+import { Button } from "@/components/ui/button"
+
+export function Navbar() {
+  const [active, setActive] = useState("")
+  const [underlinePosition, setUnderlinePosition] = useState({ left: 0, width: 0 })
+
+  function handleClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
+    if (!href.startsWith("#")) return
+    const id = href.slice(1)
+    const el = document.getElementById(id)
+    if (el) {
+      e.preventDefault()
+      el.scrollIntoView({ behavior: "smooth", block: "start" })
+      setActive(href)
+      updateUnderline(href)
+    }
+  }
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    const id = href.startsWith("#") ? href.slice(1) : href
+    const el = document.getElementById(id)
+    if (el) {
+      e.preventDefault()
+      el.scrollIntoView({ behavior: "smooth", block: "start" })
+      setActive(href)
+      updateUnderline(href)
+    }
+  }
+
+  const updateUnderline = (href: string) => {
+    const linkElement = document.querySelector(`a[href="${href}"]`)
+    if (linkElement) {
+      const { offsetLeft, offsetWidth } = linkElement
+      setUnderlinePosition({ left: offsetLeft, width: offsetWidth })
+    }
+  }
+
+  return (
+    <nav className="bg-background">
+      <div className="container mx-auto px-4 py-6">
+        <div className="relative flex items-center gap-6 text-sm overflow-x-auto md:overflow-visible">
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className={cn(
+                "hover:text-foreground",
+                active === l.href ? "text-foreground" : "text-muted-foreground",
+                "transition-colors duration-200"
+              )}
+              onClick={(e) => handleClick(e, l.href)}
+            >
+              {l.label}
+            </Link>
+          ))}
+          <div
+            className="absolute bottom-0 h-1 bg-primary transition-all duration-300"
+            style={{ left: underlinePosition.left, width: underlinePosition.width }}
+          />
+        </div>
+      </div>
+    </nav>
+  )
+}
+
+// app/page.tsx
+import { Hero, Navbar } from "@/components"
+import { links } from "@/constants"
+import FloatingCTA from "@/components/floating-cta"
+import GithubProjects from "@/components/github-projects"
+
+export default function Home() {
+  return (
+    <div>
+      <Navbar />
+      <section id="home" className="pt-24 scroll-mt-24">
+        <Hero />
+      </section>
+      <section id="about" className="pt-24 scroll-mt-24">
+        {/* About content here */}
+      </section>
+      <section id="skills" className="pt-24 scroll-mt-24">
+        {/* Skills content here */}
+      </section>
+      <section id="projects" className="pt-24 scroll-mt-24">
+        <GithubProjects />
+      </section>
+      <section id="github" className="pt-24 scroll-mt-24">
+        {/* GitHub content here */}
+      </section>
+      <section id="blog" className="pt-24 scroll-mt-24">
+        {/* Blog content here */}
+      </section>
+      <section id="timeline" className="pt-24 scroll-mt-24">
+        {/* Timeline content here */}
+      </section>
+      <section id="certifications" className="pt-24 scroll-mt-24">
+        {/* Certifications content here */}
+      </section>
+      <section id="heatmap" className="pt-24 scroll-mt-24">
+        {/* Heatmap content here */}
+      </section>
+      <section id="testimonials" className="pt-24 scroll-mt-24">
+        {/* Testimonials content here */}
+      </section>
+      <section id="contact" className="pt-24 pb-28 scroll-mt-24">
+        {/* Contact content here */}
+      </section>
+      <FloatingCTA />
+    </div>
+  )
+}
+
+// components/floating-cta.tsx
+"use client"
+
+import Chatbot from "@/components/chatbot"
+import { Button } from "@/components/ui/button"
+import { Briefcase } from 'lucide-react'
+
+export default function FloatingCTA() {
+  return (
+    <div
+      className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-[10px]"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      {/* Top: Chat assistant button and its panel (docked) */}
+      <Chatbot docked />
+
+      {/* Bottom: Hire Me at the corner */}
+      <Button asChild className="shadow-[0_0_18px_rgba(124,58,237,0.28)]" data-magnetic>
+        <a href="#contact">
+          <Briefcase className="h-4 w-4 mr-2" />
+          Hire Me
+        </a>
+      </Button>
+    </div>
+  )
+}
+
+// components/github-projects.tsx
+"use client"
+
+import { useEffect, useState } from "react"
+import { Star, Code2, ExternalLink } from 'lucide-react'
+import SectionReveal from "@/components/section-reveal"
+
+type Repo = {
+  id: number
+  name: string
+  html_url: string
+  stargazers_count: number
+  language: string | null
+  description: string | null
+  updated_at: string
+}
+
+const DEFAULT_USER = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "MADHANKUMAR-C"
+
+export default function GithubProjects() {
+  const [repos, setRepos] = useState<Repo[] | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    fetchRepos()
+  }, [])
+
+  async function fetchRepos() {
+    setLoading(true)
+    try {
+      const res = await fetch("/api/github")
+      const data = await res.json()
+      setRepos(data.repos)
+    } catch {
+      setRepos([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div>
+      <SectionReveal>
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-semibold">Latest GitHub Projects</h2>
+            <p className="text-sm text-muted-foreground mt-1">@{DEFAULT_USER}</p>
+          </div>
+        </div>
+      </SectionReveal>
+
+      {loading && <div className="py-6 opacity-70">Loading latest repositories…</div>}
+
+      {!loading && repos && (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+          {repos.map((r, i) => (
+            <SectionReveal
+              key={r.id}
+              delay={i * 0.06}
+              className="rounded-xl border border-border/60 p-5 hover:bg-card/70 transition-colors group"
+            >
+              <a href={r.html_url} target="_blank" rel="noreferrer" data-magnetic>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium">{r.name}</h3>
+                  <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100" />
+                </div>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{r.description || "No description"}</p>
+                <div className="flex items-center gap-3 mt-3 text-sm">
+                  <span className="inline-flex items-center gap-1">
+                    <Star className="h-4 w-4 text-yellow-500" /> {r.stargazers_count}
+                  </span>
+                  {r.language && (
+                    <span className="inline-flex items-center gap-1">
+                      <Code2 className="h-4 w-4 text-primary" /> {r.language}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  Updated {new Date(r.updated_at).toLocaleDateString()}
+                </div>
+              </a>
+            </SectionReveal>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// app/api/github/route.ts
+import type { NextRequest } from "next/server"
+
+const DEFAULT_USER = process.env.NEXT_PUBLIC_GITHUB_USERNAME || "MADHANKUMAR-C"
+
+export async function GET(_req: NextRequest) {
+  const username = DEFAULT_USER
+
+  const url = `https://api.github.com/users/${encodeURIComponent(
+    username,
+  )}/repos?per_page=100&sort=updated&direction=desc`
+
+  const headers: Record<string, string> = {
+    "User-Agent": "madhan-portfolio",
+    Accept: "application/vnd.github+json",
+  }
+
+  const token = process.env.GITHUB_TOKEN
+  if (token) headers.Authorization = `Bearer ${token}`
+
+  const res = await fetch(url, { headers, cache: "no-store" })
+  if (!res.ok) {
+    return new Response(JSON.stringify({ repos: [] }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })
+  }
+
+  const repos = (await res.json()) as any[]
+  const top = repos
+    .filter((r) => !r.fork)
+    .sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
+    .slice(0, 6)
+    .map((r) => ({
+      id: r.id,
+      name: r.name,
+      html_url: r.html_url,
+      stargazers_count: r.stargazers_count,
+      language: r.language,
+      description: r.description,
+      updated_at: r.updated_at,
+    }))
+
+  return new Response(JSON.stringify({ repos: top }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  })
+}
+
+// components/chatbot.tsx
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import { MessageCircle, Send, X } from 'lucide-react'
+
+type ChatMessage = {
+  id: string
+  role: "user" | "assistant"
+  content: string
+}
+
+export default function Chatbot({ docked = false }: { docked?: boolean }) {
+  const [open, setOpen] = useState(false)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [input, setInput] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const text = input.trim()
+    if (!text) return
+    const userMsg: ChatMessage = { id: crypto.randomUUID(), role: "user", content: text }
+    setMessages((prev) => [...prev, userMsg])
+    setInput("")
+    setIsLoading(true)
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          messages: [...messages, userMsg].map(({ role, content }) => ({ role, content })),
+        }),
+      })
+      const data = await res.json().catch(() => null)
+      const reply =
+        (data && (data.reply || data.text)) || "I’m here to help with portfolio-related questions."
+      const assistantMsg: ChatMessage = { id: crypto.randomUUID(), role: "assistant", content: reply }
+      setMessages((prev) => [...prev, assistantMsg])
+    } catch {
+      const assistantMsg: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "I couldn’t reach the AI service right now. Please try again shortly.",
+      }
+      setMessages((prev) => [...prev, assistantMsg])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // When docked, no fixed wrapper; panel positions above the trigger inside parent dock.
+  return (
+    <div className={docked ? "relative flex flex-col items-end" : "fixed bottom-6 right-6 z-50"}>
+      {open && (
+        <div
+          className={`mb-[10px] w-[88vw] max-w-md rounded-2xl border border-border/60 bg-background/95 backdrop-blur shadow-lg overflow-hidden ${
+            docked ? "absolute right-0 bottom-[calc(100%+10px)] m-0" : ""
+          }`}
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border/60">
+            <div className="font-semibold">AI Assistant</div>
+            <button
+              className="opacity-70 hover:opacity-100"
+              onClick={() => setOpen(false)}
+              aria-label="Close chat"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="max-h-[50vh] overflow-y-auto px-4 py-3 space-y-3">
+            {messages.length === 0 && (
+              <div className="text-sm text-muted-foreground">
+                Ask me about my skills, projects, or blog posts!
+              </div>
+            )}
+            {messages.map((m) => (
+              <div key={m.id} className={`text-sm ${m.role === "user" ? "text-right" : "text-left"}`}>
+                <div
+                  className={`inline-block px-3 py-2 rounded-lg ${
+                    m.role === "user"
+                      ? "bg-primary/20 border border-primary/30"
+                      : "bg-muted/50 border border-border/60"
+                  }`}
+                >
+                  {m.content}
+                </div>
+              </div>
+            ))}
+          </div>
+          <form onSubmit={onSubmit} className="flex items-center gap-2 px-3 pb-3">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm outline-none"
+            />
+            <button
+              type="submit"
+              className="inline-flex items-center gap-1 text-sm px-3 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-60"
+              disabled={isLoading}
+              data-magnetic
+            >
+              <Send className="h-4 w-4" />
+              Send
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Trigger always rendered; sits 10px above Hire Me because parent dock has gap-[10px] */}
+      <button
+        className="h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:opacity-90"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Open chat"
+      >
+        <MessageCircle className="h-5 w-5" />
+      </button>
+    </div>
+  )
+}
+
+// app/globals.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+
+    --primary: 222.1 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --ring: 222.1 83.2% 53.3%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+
+    --primary: 222.1 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --ring: 222.1 83.2% 53.3%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom neon cursor */
+html, body {
+  cursor: url("/cursor-neon.png") 10 2, auto;
+}
+a, button, [role="button"], input, textarea, select, .cursor-pointer {
+  cursor: url("/cursor-neon.png") 10 2, pointer;
+}
+
+/* Custom neon cursor (cyan) — ensure small PNG size; override with !important */
+html, body {
+  cursor: url("/cursor-cyan-24.png") 6 2, auto !important;
+}
+a, button, [role="button"], input, textarea, select, .cursor-pointer {
+  cursor: url("/cursor-cyan-24.png") 6 2, pointer !important;
+}
+
+/* Force custom neon cursor site-wide */
+html, body {
+  cursor: url("/cursor-cyan-24.png") 6 2, auto !important;
+}
+a, button, [role="button"], input, textarea, select, .cursor-pointer {
+  cursor: url("/cursor-cyan-24.png") 6 2, pointer !important;
+}
+
+/* Force custom cursor site-wide (keeps text I-beam for inputs) */
+html, body {
+  cursor: url("/cursor-cyan-24.png") 6 2, auto !important;
+}
+a, button, [role="button"], [data-magnetic] {
+  cursor: url("/cursor-cyan-24.png") 6 2, pointer !important;
+}
+
+html, body { cursor: url("/cursor-purple.png") 6 2, auto !important; }
+a, button, [role="button"], [data-magnetic] { cursor: url("/cursor-purple.png") 6 2, pointer !important; }
+input, textarea { cursor: text !important; }
