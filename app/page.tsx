@@ -23,11 +23,11 @@ const jsonLd = {
   "@type": "Person",
   name: "Madhan Kumar",
   alternateName: "MADHANKUMAR C",
-  url: "https://example.com",
+  url: "https://madhankumarc.vercel.com",
   jobTitle: "Web Developer",
   sameAs: [
     "https://github.com/MADHANKUMAR-C",
-    "https://www.linkedin.com/in/madhankumar-c-601132273",
+    "https://www.linkedin.com/in/madhankumar-c/",
     "https://leetcode.com/u/madhankumarc/",
     "https://www.hackerrank.com/profile/madhankumar_c",
   ],
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Madhan Kumar — Portfolio",
     description: "Adaptable Web Developer passionate about AI, Blockchain, and Cybersecurity.",
-    url: "https://example.com",
+    url: "https://madhankumarc.vercel.com",
     siteName: "Madhan Kumar Portfolio",
     images: [
       {

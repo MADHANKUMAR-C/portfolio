@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       lastMessage.includes("email") ||
       lastMessage.includes("phone")
     ) {
-      response = `You can contact ${siteData.name} through:\n• Email: madhankumar8825487841@gmail.com\n• Phone: 8825487841\n• LinkedIn: ${siteData.linkedin}\n• Or use the contact form at the bottom of this portfolio!`
+      response = `You can contact ${siteData.name} through:\n• Email: madhankumar.c@outlook.com\n• Phone: 8825487841\n• LinkedIn: ${siteData.linkedin}\n• Or use the contact form at the bottom of this portfolio!`
     } else if (lastMessage.includes("skill") || lastMessage.includes("technology") || lastMessage.includes("tech")) {
       response = `${siteData.name} has expertise in: ${siteData.skills.join(", ")}. Check out the Skills & Tech Stack section for detailed proficiency levels!`
     } else if (lastMessage.includes("project") || lastMessage.includes("work") || lastMessage.includes("portfolio")) {

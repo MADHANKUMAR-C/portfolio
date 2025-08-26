@@ -9,8 +9,8 @@ export default function AboutSection() {
       <SectionReveal className="md:col-span-2" delay={0.05}>
         <h2 className="text-2xl font-semibold mb-3">About Me</h2>
         <p className="text-muted-foreground leading-relaxed">
-          Detail-oriented Computer Science and Design student with expertise in web and full-stack app development,
-          ethical hacking, and cloud computing. Strong logical thinking skills with a focus on continuous learning and
+          Detail-oriented Computer Science and Design student with expertise in web and full-stack app development
+          and cloud computing. Strong logical thinking skills with a focus on continuous learning and
           innovation.
         </p>
 
@@ -26,7 +26,7 @@ export default function AboutSection() {
             <span className="text-sm">GitHub</span>
           </a>
           <a
-            href="https://www.linkedin.com/in/madhankumar-c-601132273"
+            href="https://www.linkedin.com/in/madhankumar-c/"
             target="_blank"
             rel="noreferrer"
             className="glow-button inline-flex items-center gap-2 px-3 py-2 rounded-md border border-border/60 hover:bg-card/70 transition-all duration-300"

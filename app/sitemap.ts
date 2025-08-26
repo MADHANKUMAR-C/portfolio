@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next"
 import { getAllPosts } from "@/lib/blog"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = "https://example.com"
+  const base = "https://madhankumarc.vercel.com"
   const posts = await getAllPosts()
 
   const staticRoutes: MetadataRoute.Sitemap = [

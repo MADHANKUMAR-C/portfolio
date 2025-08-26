@@ -65,7 +65,6 @@ export default function GithubProjects() {
                   <h3 className="font-medium">{r.name}</h3>
                   <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100" />
                 </div>
-                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{r.description || "No description"}</p>
                 <div className="flex items-center gap-3 mt-3 text-sm">
                   {/* Removed star count display */}
                   {r.language && (

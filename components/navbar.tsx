@@ -179,7 +179,7 @@ export default function Navbar() {
               <Github size={20} />
             </a>
             <a
-              href="https://www.linkedin.com/in/madhankumar-c-601132273"
+              href="https://www.linkedin.com/in/madhankumar-c/"
               target="_blank"
               rel="noreferrer"
               aria-label="LinkedIn"
@@ -189,7 +189,7 @@ export default function Navbar() {
               <Linkedin size={20} />
             </a>
             <a
-              href="mailto:madhankumar8825487841@gmail.com"
+              href="mailto:madhankumar.c@outlook.com"
               aria-label="Email"
               className="opacity-80 hover:opacity-100 transition-opacity"
               data-magnetic

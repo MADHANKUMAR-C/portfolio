@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { getAllPosts } from "@/lib/blog"
 
 export async function GET() {
-  const site = "https://example.com"
+  const site = "https://madhankumarc.vercel.com"
   const posts = await getAllPosts()
 
   const items = posts

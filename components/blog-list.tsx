@@ -1,14 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, X } from "lucide-react"
+import { X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface BlogPost {
   slug: string
   frontmatter: {
     title: string
-    date: string
     description: string
   }
   content: string
@@ -21,15 +20,6 @@ interface BlogListProps {
 export default function BlogList({ posts }: BlogListProps) {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null)
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    })
-  }
-
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-6">Blog</h2>
@@ -41,10 +31,6 @@ export default function BlogList({ posts }: BlogListProps) {
             className="rounded-xl border border-border/60 p-5 hover:bg-card/70 transition-colors text-left w-full"
           >
             <h3 className="font-semibold">{p.frontmatter.title}</h3>
-            <div className="text-xs text-muted-foreground mt-1 inline-flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <span>{formatDate(p.frontmatter.date)}</span>
-            </div>
             <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{p.frontmatter.description}</p>
             <span className="text-primary text-sm mt-3 inline-block">Read more →</span>
           </button>
@@ -70,10 +56,6 @@ export default function BlogList({ posts }: BlogListProps) {
               <div className="flex items-center justify-between p-6 border-b border-border/30">
                 <div>
                   <h2 className="text-xl font-semibold">{selectedPost.frontmatter.title}</h2>
-                  <div className="text-sm text-muted-foreground mt-1 inline-flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    <span>{formatDate(selectedPost.frontmatter.date)}</span>
-                  </div>
                 </div>
                 <button
                   onClick={() => setSelectedPost(null)}
